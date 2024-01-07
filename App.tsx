@@ -1,4 +1,5 @@
 import React, {useEffect, useState} from 'react';
+import {NativeModules} from 'react-native';
 import {
   Image,
   ScrollView,
@@ -18,66 +19,78 @@ function App(): JSX.Element {
   const [started, setStarted] = useState('');
   const [results, setResults] = useState([]);
   const [partialResults, setPartialResults] = useState([]);
-  console.log('err=>', error);
-  useEffect(() => {
-    Voice.onSpeechStart = onSpeechStart;
-    Voice.onSpeechEnd = onSpeechEnd;
-    Voice.onSpeechError = onSpeechError;
-    Voice.onSpeechResults = onSpeechResults;
+  const [language, setLanguage] = useState('en-IN');
 
-    return () => {
-      Voice.destroy().then(Voice.removeAllListeners);
-    };
-  }, []);
+  const SpeechToText = NativeModules.SpeechToText;
 
-  const onSpeechStart = (e: any) => {
-    console.log('onSpeechStart: ', e);
-    setStarted('√');
-  };
-
-  const onSpeechEnd = (e: any) => {
-    console.log('onSpeechEnd: ', e);
-    setEnd('√');
-  };
-
-  const onSpeechError = (e: SpeechErrorEvent) => {
-    console.log('onSpeechError: ', e);
-    setError(JSON.stringify(e.error));
-  };
-
-  const onSpeechResults = (e: SpeechResultsEvent) => {
-    console.log('onSpeechResults: ', e);
-    setResults(e.value);
-  };
-
-  const startRecognizing = async () => {
+  async function startSpeechToText() {
+    console.log('start speach recogination');
     try {
-      await Voice.start('en-Us');
-      setStarted('');
-      setEnd('');
-      setResults([]);
-    } catch (err) {
-      console.log('err start: ', err);
+      const result = await SpeechToText.startRecognition(language); // <-- pass language here , in which you want the output.
+      console.log('Speech recognized: ', result.text);
+    } catch (error) {
+      console.error(error);
     }
-  };
+  }
 
-  const stopRecognizing = async () => {
-    try {
-      await Voice.stop();
-      await Voice.destroy();
-      Voice.removeAllListeners();
-      setStarted('');
-      setEnd('');
-      setResults([]);
-    } catch (err) {
-      console.log('err start: ', err);
-    }
-  };
+  // useEffect(() => {
+  //   Voice.onSpeechStart = onSpeechStart;
+  //   Voice.onSpeechEnd = onSpeechEnd;
+  //   Voice.onSpeechError = onSpeechError;
+  //   Voice.onSpeechResults = onSpeechResults;
+
+  //   return () => {
+  //     Voice.destroy().then(Voice.removeAllListeners);
+  //   };
+  // }, []);
+
+  // const onSpeechStart = (e: any) => {
+  //   console.log('onSpeechStart: ', e);
+  //   setStarted('√');
+  // };
+
+  // const onSpeechEnd = (e: any) => {
+  //   console.log('onSpeechEnd: ', e);
+  //   setEnd('√');
+  // };
+
+  // const onSpeechError = (e: SpeechErrorEvent) => {
+  //   console.log('onSpeechError: ', e);
+  //   setError(JSON.stringify(e.error));
+  // };
+
+  // const onSpeechResults = (e: SpeechResultsEvent) => {
+  //   console.log('onSpeechResults: ', e);
+  //   setResults(e.value);
+  // };
+
+  // const startRecognizing = async () => {
+  //   try {
+  //     await Voice.start('en-Us');
+  //     setStarted('');
+  //     setEnd('');
+  //     setResults([]);
+  //   } catch (err) {
+  //     console.log('err start: ', err);
+  //   }
+  // };
+
+  // const stopRecognizing = async () => {
+  //   try {
+  //     await Voice.stop();
+  //     await Voice.destroy();
+  //     Voice.removeAllListeners();
+  //     setStarted('');
+  //     setEnd('');
+  //     setResults([]);
+  //   } catch (err) {
+  //     console.log('err start: ', err);
+  //   }
 
   return (
     <View style={styles.sectionContainer}>
       <Text style={{textAlign: 'center'}}>Voice</Text>
-      <TouchableOpacity style={styles.btn} onPress={() => startRecognizing()}>
+      <TouchableOpacity style={styles.btn} onPress={startSpeechToText}>
         <Image source={require('./mic2.png')} style={{width: 60, height: 60}} />
       </TouchableOpacity>
       <View style={styles.box}>
@@ -94,7 +107,7 @@ function App(): JSX.Element {
         })}
       </ScrollView>
 
-      <TouchableOpacity style={styles.btn2} onPress={() => stopRecognizing()}>
+      <TouchableOpacity style={styles.btn2} onPress={() => console.log('work')}>
         <Text style={{color: 'white'}}>Stop List</Text>
       </TouchableOpacity>
     </View>
